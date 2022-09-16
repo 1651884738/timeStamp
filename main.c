@@ -56,161 +56,7 @@ Times stamp_to_standard(int stampTime)
     return standard;
 }
 
-enum TIME_DEF
-{
-    SEC = 1,
-    MIN = SEC * 60,
-    HOUR = MIN * 60,
-    DAY = HOUR * 24,
-    YEAR = DAY * 365,
-};
 
-time_t time_difference = 8 * HOUR;
-static time_t mon_yday[2][12] =
-        {
-                {0,31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334},
-                {0,31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335},
-        };
-
-int leap(int year) {
-    if ((year % 400 == 0) || (year % 4 == 0 && year % 100 != 0)) {
-        return 1;
-    }
-    return 0;
-}
-long long get_day(int year) {
-    year = year - 1;
-    int leap_year_num = year / 4 - year / 100 + year / 400;
-    long long tol_day = year * 365 + leap_year_num;
-    return tol_day;
-}
-#if 1
-time_t _mymktime(int year,int mon,int day,int hour,int min,int sec) {
-    long long tol_day = 0;
-    year += 1900;
-    tol_day = get_day(year) - get_day(1970);
-    tol_day += mon_yday[leap(year)][mon];
-    tol_day += day - 1;
-
-    long long ret = 0;
-    ret += tol_day * DAY;
-    ret += hour * HOUR;
-    ret += min * MIN;
-    ret += sec * SEC;
-
-   return ret - time_difference;
-   //return ret;
-}
-#endif
-
-time_t mymktime(struct tm* mk) {
-    if (!mk) {
-        return -1;
-    }
-    if (!(mk->tm_sec>= 0 && mk->tm_sec <= 59)) {
-        return -1;
-    }
-    if (!(mk->tm_min>= 0 && mk->tm_min <= 59)) {
-        return -1;
-    }
-    if (!(mk->tm_hour>= 0 && mk->tm_hour <= 23)) {
-        return -1;
-    }
-    if (!(mk->tm_mday>= 1 && mk->tm_hour <= 31)) {
-        return -1;
-    }
-    if (!(mk->tm_mon>= 0 && mk->tm_mon <= 11)) {
-        return -1;
-    }
-    if (!(mk->tm_year>= 70)) {
-        return -1;
-    }
-
-    return _mymktime(mk->tm_year,mk->tm_mon,mk->tm_mday,mk->tm_hour,mk->tm_min,mk->tm_sec);
-}
-
-
-/**
- *
- *
- * */
-
-typedef struct
-{
-    int 	year;
-    int 	month;
-    int 	day;
-    int 	hour;
-    int 	min;
-    int 	sec;
-    int 	ms;
-}_clock;
-
-
-
-void timToStamp(long long int *pStamp, _clock clock)
-{
-    static  int MON1[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};	//平年
-    static  int MON2[12] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};	//闰年
-    int *month = NULL;
-    int leapYearCnt = 0;
-    long long int days = 0;
-    //获得1970年到当前年的前一年共有多少闰天
-    for(int i = 1970; i < clock.year; i++)
-    {
-        if((i % 4 == 0 && i % 100 != 0) || (i % 400 == 0))
-        {
-            leapYearCnt++;
-        }
-    }
-    days = leapYearCnt * 366 + (clock.year - 1970 -leapYearCnt) * 365;
-    /*判断当前年是不是闰年*/
-    if((clock.year % 4 == 0 && clock.year % 100 != 0) || (clock.year % 400 == 0))
-    {
-        month = MON2;
-    }
-    else
-    {
-        month = MON1;
-    }
-
-    for(int i = 0; i < clock.month - 1; i++)
-    {
-        days += month[i];
-    }
-
-    *pStamp = (days + clock.day-1) * 24 * 3600 * 1000 + clock.hour * 3600 * 1000 + clock.min * 60 * 1000 + clock.sec * 1000 + clock.ms - 8 * 3600 * 1000;
-}
-
-int main() {
-    struct tm stamp;
-    standard_to_stamp("2022-09-16 14:45:33");
-    stamp_to_standard(1663310733);
-
-    stamp.tm_year = 2022;
-    stamp.tm_mon = 9;
-    stamp.tm_mday = 16;
-    stamp.tm_hour = 14;
-    stamp.tm_min = 45;
-    stamp.tm_sec = 33;
-    int timeStamp  = (int)mymktime(&stamp);
-    printf("%d\r\n",timeStamp);
-
-    _clock clock;
-    clock.year = 2022;
-    clock.month = 9;
-    clock.day = 16;
-    clock.hour = 14;
-    clock.min = 45;
-    clock.sec = 33;
-    clock.ms = 000;
-
-    static long long int stampx = 0;
-    timToStamp(&stampx, clock);
-    printf("%ld\r\n", stampx);
-
-    return 0;
-}
 
 /*******************************************************/
 
@@ -249,8 +95,11 @@ size_t Date2timeStamp(Date standardTime){
     size_t differenceValue = 0;     //定义这个差值，单位为秒
     int leapYears = 0;
 
-    if(standardTime.Year < specialTime.Year)    //不允许 specialTime.Year 之前的时间传进来
+    if((standardTime.Year < specialTime.Year) || (standardTime.Year > 2099))//不允许 specialTime.Year 之前的时间传进来
+    {
+        printf("This year %d is not supported\r\n",standardTime.Year);
         return -1;
+    }
 
     //从 specialTime 开始，到 standardTime 的前一年之间有过少个闰年
     for(int i = specialTime.Year; i < standardTime.Year; i++)
