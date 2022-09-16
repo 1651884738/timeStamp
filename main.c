@@ -97,9 +97,35 @@ size_t Date2timeStamp(Date standardTime){
 
     if((standardTime.Year < specialTime.Year) || (standardTime.Year > 2099))//不允许 specialTime.Year 之前的时间传进来
     {
-        printf("This year %d is not supported\r\n",standardTime.Year);
+        printf("The year %d is not supported\r\n",standardTime.Year);
         return -1;
     }
+    if((standardTime.Mon < 1) || (standardTime.Mon > 12))//不允许 无效的mon 传入
+    {
+        printf("The month %.2d is out of line\r\n",standardTime.Mon);
+        return -1;
+    }
+    if((standardTime.Day < 1) || (standardTime.Day > 31))//不允许 无效的day 传入
+    {
+        printf("The day %.2d is out of line\r\n",standardTime.Day);
+        return -1;
+    }
+    if((standardTime.Day < 1) || (standardTime.Day > 31))//不允许 无效的hour 传入
+    {
+        printf("The hour %.2d is out of line\r\n",standardTime.Hour);
+        return -1;
+    }
+    if((standardTime.Day < 1) || (standardTime.Day > 31))//不允许 无效的min 传入
+    {
+        printf("The min %.2d is out of line\r\n",standardTime.Min);
+        return -1;
+    }
+    if((standardTime.Day < 1) || (standardTime.Day > 31))//不允许 无效的sec 传入
+    {
+        printf("The sec %.2d is out of line\r\n",standardTime.Second);
+        return -1;
+    }
+
 
     //从 specialTime 开始，到 standardTime 的前一年之间有过少个闰年
     for(int i = specialTime.Year; i < standardTime.Year; i++)
@@ -109,14 +135,19 @@ size_t Date2timeStamp(Date standardTime){
             leapYears++;
         }
     }
-    //判读今年是不是闰年
+    //判断 是不是闰年
     if((standardTime.Year % 4 == 0 && standardTime.Year % 100 != 0) || (standardTime.Year % 400 == 0))  //判断是否闰年
     {
         if(standardTime.Mon >= 2)
         {
+            //判断 是不是二月
             if(standardTime.Mon = 2)
             {
-
+                return (differenceValue +=
+                        (standardTime.Day * SECONDS_IN_A_DAY +
+                        standardTime.Hour * SECONDS_IN_AN_HOUR +
+                        standardTime.Min * SECONDS_IN_A_MINUTE +
+                        standardTime.Second));
             }
         }
     }
